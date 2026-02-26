@@ -1,0 +1,11 @@
+// _app.js
+import "../app/globals.css"
+import { PrimeReactProvider } from "primereact/api"
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <PrimeReactProvider>
+      <Component {...pageProps} />
+    </PrimeReactProvider>
+  )
+}

@@ -1,13 +1,14 @@
 "use client"
-import { Button } from "primereact/button"
+
 import { Dropdown } from "primereact/dropdown"
 import { FileUpload } from "primereact/fileupload"
-import { ProgressBar } from "primereact/progressbar"
+import { ProgressSpinner } from "primereact/progressspinner"
 import { Tag } from "primereact/tag"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 
 export default function Home() {
   const [totalSize, setTotalSize] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [selectedFormat, setSelectedFormat] = useState(null)
   const [fileCount, setFileCount] = useState(0)
   const fileUploadRef = useRef(null)
@@ -53,7 +54,7 @@ export default function Home() {
         {cancelButton}
         <div className="flex items-center gap-3 ml-auto">
           <span className="font-mono tabular-nums text-zinc-500 text-xs">
-            {formatedValue} / 1 MB
+            {formatedValue} / 10 MB
           </span>
           <div className="bg-zinc-700 rounded-full w-24 h-1.5 overflow-hidden">
             <div
@@ -105,10 +106,7 @@ export default function Home() {
       </div>
       <div>
         <p className="font-semibold text-zinc-400 text-sm text-center">
-          Arraste sua imagem aqui
-        </p>
-        <p className="mt-1 text-zinc-600 text-xs text-center">
-          PNG, JPG ou WEBP — máx. 1 MB
+          Arraste seu arquivo aqui
         </p>
       </div>
     </div>
@@ -164,6 +162,41 @@ export default function Home() {
   }
 
   const canDownload = fileCount > 0 && selectedFormat
+
+  const baseAPIURL = `http://64.181.170.90:8080/api/v1/conversions/images/to-${selectedFormat?.code}`
+
+  const postApiToDownload = async () => {
+    const formData = new FormData()
+
+    const currentFiles = fileUploadRef?.current?.getFiles()
+    formData.append("file", currentFiles[0])
+    setLoading(true)
+
+    try {
+      const response = await fetch(baseAPIURL, {
+        method: "POST",
+        body: formData,
+      })
+
+      const blob = await response.blob()
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download =
+        currentFiles[0].name.replace(/\.[^/.]+$/, "") +
+        `.${selectedFormat.code}`
+      document.body.appendChild(a)
+      a.click()
+
+      window.URL.revokeObjectURL(url)
+      a.remove()
+    } catch (error) {
+      console.error("Erro:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <main className="relative flex justify-center items-center bg-zinc-900 p-4 min-h-screen overflow-hidden">
@@ -256,6 +289,7 @@ export default function Home() {
         />
 
         <button
+          onClick={postApiToDownload}
           disabled={!canDownload}
           className={`
             mt-5 w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl
@@ -267,12 +301,22 @@ export default function Home() {
             }
           `}
         >
-          <i
-            className={`pi pi-download text-sm ${canDownload ? "text-violet-200" : "text-zinc-600"}`}
-          />
-          {canDownload
-            ? `Baixar como .${selectedFormat.code}${fileCount > 1 ? ` (${fileCount} arquivos)` : ""}`
-            : "Selecione arquivo e formato"}
+          {!loading ? (
+            <i
+              className={`pi pi-download text-sm ${canDownload ? "text-violet-200" : "text-zinc-600"}`}
+            />
+          ) : (
+            ""
+          )}
+          {loading ? (
+            <ProgressSpinner
+              style={{ width: "20px", height: "20px", stroke: "10px" }}
+            />
+          ) : canDownload ? (
+            `Baixar como .${selectedFormat.code}${fileCount > 1 ? ` (${fileCount} arquivos)` : ""}`
+          ) : (
+            "Selecione arquivo e formato"
+          )}
         </button>
 
         <p className="flex justify-center items-center gap-1.5 mt-4 text-[11px] text-zinc-700 text-center">

@@ -3,15 +3,82 @@
 import { Dropdown } from "primereact/dropdown"
 import { FileUpload } from "primereact/fileupload"
 import { ProgressSpinner } from "primereact/progressspinner"
-import { Tag } from "primereact/tag"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
+
+const FORMAT_MAP = {
+  image: [
+    {
+      name: "WEBP",
+      description: "Compressão moderna",
+      code: "webp",
+      icon: "pi-bolt",
+    },
+    {
+      name: "PNG",
+      description: "Sem perda de qualidade",
+      code: "png",
+      icon: "pi-image",
+    },
+    {
+      name: "JPEG",
+      description: "Menor tamanho",
+      code: "jpeg",
+      icon: "pi-file",
+    },
+  ],
+  document: [
+    {
+      name: "PDF",
+      description: "Documento portátil",
+      code: "pdf",
+      icon: "pi-file-pdf",
+    },
+    {
+      name: "DOCX",
+      description: "Microsoft Word",
+      code: "docx",
+      icon: "pi-file-word",
+    },
+    {
+      name: "TXT",
+      description: "Texto simples",
+      code: "txt",
+      icon: "pi-align-left",
+    },
+  ],
+}
+
+const FILE_TYPES = [
+  {
+    name: "Imagem",
+    description: "PNG, JPEG, WEBP...",
+    code: "image",
+    icon: "pi-image",
+    accept: "image/*",
+  },
+  {
+    name: "Documento",
+    description: "PDF, DOCX, TXT...",
+    code: "document",
+    icon: "pi-file",
+    accept: ".pdf,.doc,.docx,.txt",
+  },
+]
 
 export default function Home() {
   const [totalSize, setTotalSize] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [selectedType, setSelectedType] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(null)
   const [fileCount, setFileCount] = useState(0)
   const fileUploadRef = useRef(null)
+
+  const availableFormats = selectedType ? FORMAT_MAP[selectedType.code] : []
+
+  const handleTypeChange = (e) => {
+    setSelectedType(e.value)
+    setSelectedFormat(null)
+  }
 
   const onTemplateSelect = (e) => {
     let _totalSize = totalSize
@@ -41,6 +108,17 @@ export default function Home() {
     setFileCount(0)
   }
 
+  const getTypeDisabled = (typeCode) => {
+    if (fileCount === 0) return false
+    const currentFiles = fileUploadRef?.current?.getFiles() ?? []
+    if (currentFiles.length === 0) return false
+    const file = currentFiles[0]
+    const isImage = file.type.startsWith("image/")
+    if (typeCode === "image") return !isImage
+    if (typeCode === "document") return isImage
+    return false
+  }
+
   const headerTemplate = (options) => {
     const { chooseButton, cancelButton } = options
     const value = Math.min((totalSize / 1000000) * 100, 100)
@@ -68,34 +146,39 @@ export default function Home() {
   }
 
   const itemTemplate = (file, props) => (
-    <div className="group flex items-center gap-3 px-4 py-3 border-white/5 border-b last:border-b-0 transition-colors">
-      <img
-        alt={file.name}
-        role="presentation"
-        src={file.objectURL}
-        className="border border-white/10 rounded-xl w-12 h-12 object-cover shrink-0"
-      />
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-zinc-200 text-sm truncate">
-          {file.name}
-        </p>
-        <p className="mt-0.5 text-zinc-500 text-xs">
-          {new Date().toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
-        </p>
+    <div className="group flex justify-between items-center gap-3 px-4 py-3 border-white/5 border-b last:border-b-0 transition-colors">
+      <div className="flex items-center gap-3 m-3 min-w-0">
+        <div className="flex justify-center items-center border-2 border-white/60 rounded-xl w-12 h-12">
+          <i
+            className={`text-white/80 pi  ${fileUploadRef?.current?.getFiles()[0]?.type?.startsWith("image/") ? "pi-image" : "pi-file-pdf"}`}
+            style={{ fontSize: "20px" }}
+          ></i>
+        </div>
+
+        <div>
+          <p className="font-medium text-md text-zinc-200 text-start truncate">
+            {file.name}
+          </p>
+          <p className="mt-0.5 text-zinc-500 text-xs text-start">
+            {new Date().toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+        </div>
       </div>
-      <span className="bg-amber-500/10 px-2.5 py-1 border border-amber-500/20 rounded-lg font-medium text-amber-400 text-xs shrink-0">
-        {props.formatSize}
-      </span>
-      <button
-        onClick={() => onTemplateRemove(file, props.onRemove)}
-        className="flex justify-center items-center hover:bg-red-500/10 opacity-0 group-hover:opacity-100 border border-red-500/20 hover:border-red-500/40 rounded-lg w-8 h-8 text-red-500/50 hover:text-red-400 transition-all shrink-0"
-      >
-        <i className="text-xs pi pi-times" />
-      </button>
+      <div className="flex items-center gap-3">
+        <span className="bg-amber-500/10 px-2.5 py-1 border border-amber-500/20 rounded-lg font-medium text-amber-400 text-sm shrink-0">
+          {props.formatSize}
+        </span>
+        <button
+          onClick={() => onTemplateRemove(file, props.onRemove)}
+          className="flex justify-center items-center hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40 rounded-lg w-8 h-8 text-red-500/50 hover:text-red-400 transition-all shrink-0"
+        >
+          <i className="text-xs pi pi-times" />
+        </button>
+      </div>
     </div>
   )
 
@@ -112,26 +195,32 @@ export default function Home() {
     </div>
   )
 
-  const formats = [
-    {
-      name: "WEBP",
-      description: "Compressão moderna",
-      code: "webp",
-      icon: "pi-bolt",
-    },
-    {
-      name: "PNG",
-      description: "Sem perda de qualidade",
-      code: "png",
-      icon: "pi-image",
-    },
-    {
-      name: "JPEG",
-      description: "Menor tamanho",
-      code: "jpeg",
-      icon: "pi-file",
-    },
-  ]
+  const typeOptionTemplate = (option) => {
+    const disabled = getTypeDisabled(option.code)
+    return (
+      <div className="flex items-center gap-2 m-2">
+        <div>
+          <p className="font-semibold text-zinc-200 text-sm leading-tight">
+            {option.name}
+          </p>
+          <p className="text-zinc-500 text-xs">{option.description}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const selectedTypeTemplate = (option) => {
+    if (!option)
+      return (
+        <span className="text-zinc-500 text-sm">Imagem / Documento...</span>
+      )
+    return (
+      <div className="flex items-center gap-2">
+        <span className="font-medium text-zinc-200 text-sm">{option.name}</span>
+        <span className="text-zinc-500 text-xs">— {option.description}</span>
+      </div>
+    )
+  }
 
   const formatOptionTemplate = (option) => (
     <div className="flex items-center gap-3 py-0.5">
@@ -150,7 +239,11 @@ export default function Home() {
   const selectedFormatTemplate = (option) => {
     if (!option)
       return (
-        <span className="text-zinc-500 text-sm">Selecione um formato...</span>
+        <span className="text-zinc-500 text-sm">
+          {selectedType
+            ? "Selecione um formato..."
+            : "Selecione o tipo primeiro..."}
+        </span>
       )
     return (
       <div className="flex items-center gap-2">
@@ -161,13 +254,31 @@ export default function Home() {
     )
   }
 
+  const dropdownPT = {
+    root: {
+      className:
+        "w-full !bg-zinc-800/50 !border !border-white/[0.07] !rounded-2xl hover:!border-violet-500/40 transition-colors",
+    },
+    input: { className: "!py-3.5 !px-4 !text-sm" },
+    trigger: { className: "!text-zinc-500 !pr-4" },
+    panel: {
+      className:
+        "!bg-zinc-900 !border !border-white/10 !rounded-2xl !shadow-2xl !shadow-black/60 !mt-1.5 !overflow-hidden",
+    },
+    wrapper: { className: "!rounded-2xl" },
+    list: { className: "!m-1.5" },
+    item: {
+      className:
+        "!rounded-xl !px-3 !my-2 py-2! hover:!bg-violet-500/10 !text-zinc-300 !transition-colors data-[p-highlight=true]:!bg-violet-500/15 data-[p-highlight=true]:!text-violet-300",
+    },
+  }
+
   const canDownload = fileCount > 0 && selectedFormat
 
-  const baseAPIURL = `http://64.181.170.90:8080/api/v1/conversions/images/to-${selectedFormat?.code}`
+  const baseAPIURL = `http://64.181.170.90:8080/api/v1/conversions/${selectedType?.code}s/to-${selectedFormat?.code}`
 
   const postApiToDownload = async () => {
     const formData = new FormData()
-
     const currentFiles = fileUploadRef?.current?.getFiles()
     formData.append("file", currentFiles[0])
     setLoading(true)
@@ -179,7 +290,6 @@ export default function Home() {
       })
 
       const blob = await response.blob()
-
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
@@ -188,7 +298,6 @@ export default function Home() {
         `.${selectedFormat.code}`
       document.body.appendChild(a)
       a.click()
-
       window.URL.revokeObjectURL(url)
       a.remove()
     } catch (error) {
@@ -200,7 +309,7 @@ export default function Home() {
 
   return (
     <main className="relative flex justify-center items-center bg-zinc-900 p-4 min-h-screen overflow-hidden">
-      <div className="relative bg-zinc-900/70 shadow-2xl shadow-black/60 backdrop-blur-xl p-7 border border-white/[0.07] rounded-3xl w-full max-w-lg">
+      <div className="relative bg-zinc-900/70 shadow-2xl shadow-black/60 backdrop-blur-xl p-7 border border-white/[0.07] rounded-3xl w-full max-w-[50%]">
         <h1 className="bg-clip-text bg-linear-to-r from-violet-400 to-orange-400 mb-2 font-black text-transparent text-3xl leading-tight tracking-tight">
           Conversor de arquivos
         </h1>
@@ -211,6 +320,7 @@ export default function Home() {
 
         <div className="bg-linear-to-r from-transparent via-white/8 to-transparent mb-6 h-px" />
 
+        {/* File upload section */}
         <div className="flex items-center gap-2 mb-3">
           <span className="font-bold text-[10px] text-zinc-500 uppercase tracking-[0.15em]">
             Arquivo
@@ -222,8 +332,8 @@ export default function Home() {
           ref={fileUploadRef}
           name="demo[]"
           url="/api/upload"
-          accept="image/*"
-          maxFileSize={1000000}
+          accept={selectedType?.accept ?? "*"}
+          maxFileSize={10000000}
           onUpload={onTemplateUpload}
           onSelect={onTemplateSelect}
           onError={onTemplateClear}
@@ -260,39 +370,52 @@ export default function Home() {
           <div className="flex-1 bg-white/5 h-px" />
         </div>
 
-        <Dropdown
-          value={selectedFormat}
-          onChange={(e) => setSelectedFormat(e.value)}
-          options={formats}
-          optionLabel="name"
-          placeholder="Selecione um formato..."
-          itemTemplate={formatOptionTemplate}
-          valueTemplate={selectedFormatTemplate}
-          pt={{
-            root: {
-              className:
-                "w-full !bg-zinc-800/50 !border !border-white/[0.07] !rounded-2xl hover:!border-violet-500/40 transition-colors",
-            },
-            input: { className: "!py-3.5 !px-4 !text-sm" },
-            trigger: { className: "!text-zinc-500 !pr-4" },
-            panel: {
-              className:
-                "!bg-zinc-900 !border !border-white/10 !rounded-2xl !shadow-2xl !shadow-black/60 !mt-1.5 !overflow-hidden",
-            },
-            wrapper: { className: "!rounded-2xl" },
-            list: { className: "!p-1.5" },
-            item: {
-              className:
-                "!rounded-xl !px-3 !py-2.5 hover:!bg-violet-500/10 !text-zinc-300 !transition-colors data-[p-highlight=true]:!bg-violet-500/15 data-[p-highlight=true]:!text-violet-300",
-            },
-          }}
-        />
+        <div className="flex gap-3 mb-5">
+          <Dropdown
+            value={selectedType}
+            onChange={handleTypeChange}
+            options={FILE_TYPES}
+            optionLabel="name"
+            placeholder="Tipo..."
+            itemTemplate={typeOptionTemplate}
+            valueTemplate={selectedTypeTemplate}
+            optionDisabled={(option) => getTypeDisabled(option.code)}
+            pt={{
+              ...dropdownPT,
+              root: {
+                className:
+                  "w-1/2 !bg-zinc-800/50 !border !border-white/[0.07] !rounded-2xl hover:!border-violet-500/40 transition-colors",
+              },
+            }}
+          />
+
+          <Dropdown
+            value={selectedFormat}
+            onChange={(e) => setSelectedFormat(e.value)}
+            options={availableFormats}
+            optionLabel="name"
+            placeholder={selectedType ? "Formato..." : "—"}
+            disabled={!selectedType}
+            itemTemplate={formatOptionTemplate}
+            valueTemplate={selectedFormatTemplate}
+            pt={{
+              ...dropdownPT,
+              root: {
+                className: `w-1/2 !bg-zinc-800/50 !border !rounded-2xl transition-colors ${
+                  selectedType
+                    ? "!border-white/[0.07] hover:!border-violet-500/40"
+                    : "!border-white/[0.04] opacity-50 cursor-not-allowed"
+                }`,
+              },
+            }}
+          />
+        </div>
 
         <button
           onClick={postApiToDownload}
           disabled={!canDownload}
           className={`
-            mt-5 w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl
+            w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl
             font-bold text-sm tracking-wide transition-all duration-200
             ${
               canDownload
@@ -305,9 +428,7 @@ export default function Home() {
             <i
               className={`pi pi-download text-sm ${canDownload ? "text-violet-200" : "text-zinc-600"}`}
             />
-          ) : (
-            ""
-          )}
+          ) : null}
           {loading ? (
             <ProgressSpinner
               style={{ width: "20px", height: "20px", stroke: "10px" }}

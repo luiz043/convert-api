@@ -4,9 +4,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-}
-
-module.exports = {
   async rewrites() {
     return [
       {

@@ -6,4 +6,15 @@ const nextConfig: NextConfig = {
   },
 }
 
+module.exports = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://64.181.170.90:8080/api/:path*",
+      },
+    ]
+  },
+}
+
 export default nextConfig

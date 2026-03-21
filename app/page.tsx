@@ -91,7 +91,7 @@ export default function Home() {
   const [selectedType, setSelectedType] = useState<FileType | null>(null)
   const [selectedFormat, setSelectedFormat] = useState(null)
   const [fileCount, setFileCount] = useState(0)
-  const fileUploadRef = useRef(null)
+  const fileUploadRef = useRef<FileUpload>(null)
 
   const availableFormats = selectedType ? FORMAT_MAP[selectedType.code] : []
 

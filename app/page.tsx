@@ -5,7 +5,18 @@ import { FileUpload } from "primereact/fileupload"
 import { ProgressSpinner } from "primereact/progressspinner"
 import { useState, useRef } from "react"
 
-const FORMAT_MAP = {
+type FormatType = {
+  name: string
+  description: string
+  code: string
+  icon: string
+}
+
+interface selectedTypeInterface {
+  image: FormatType[]
+  document: FormatType[]
+}
+const FORMAT_MAP: selectedTypeInterface = {
   image: [
     {
       name: "WEBP",
@@ -47,8 +58,17 @@ const FORMAT_MAP = {
     },
   ],
 }
+type FileTypeCode = "image" | "document"
 
-const FILE_TYPES = [
+type FileType = {
+  name: string
+  description: string
+  code: FileTypeCode
+  icon: string
+  accept: string
+}
+
+const FILE_TYPES: FileType[] = [
   {
     name: "Imagem",
     description: "PNG, JPEG, WEBP...",
@@ -68,12 +88,12 @@ const FILE_TYPES = [
 export default function Home() {
   const [totalSize, setTotalSize] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [selectedType, setSelectedType] = useState(null)
+  const [selectedType, setSelectedType] = useState<FileType | null>(null)
   const [selectedFormat, setSelectedFormat] = useState(null)
   const [fileCount, setFileCount] = useState(0)
   const fileUploadRef = useRef(null)
 
-  const availableFormats = selectedType ? FORMAT_MAP[selectedType?.code] : []
+  const availableFormats = selectedType ? FORMAT_MAP[selectedType.code] : []
 
   const handleTypeChange = (e) => {
     setSelectedType(e.value)

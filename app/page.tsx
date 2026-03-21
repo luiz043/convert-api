@@ -165,7 +165,7 @@ export default function Home() {
     )
   }
 
-  const itemTemplate = (file, props) => (
+  const itemTemplate = (file: any, props: any) => (
     <div className="group flex justify-between items-center gap-3 px-4 py-3 border-white/5 border-b last:border-b-0 transition-colors">
       <div className="flex items-center gap-3 m-3 min-w-0">
         <div className="flex justify-center items-center border-2 border-white/60 rounded-xl w-12 h-12">
@@ -215,7 +215,7 @@ export default function Home() {
     </div>
   )
 
-  const typeOptionTemplate = (option) => {
+  const typeOptionTemplate = (option: any) => {
     const disabled = getTypeDisabled(option.code)
     return (
       <div className="flex items-center gap-2 m-2">
@@ -229,7 +229,7 @@ export default function Home() {
     )
   }
 
-  const selectedTypeTemplate = (option) => {
+  const selectedTypeTemplate = (option: any) => {
     if (!option)
       return (
         <span className="text-zinc-500 text-sm">Imagem / Documento...</span>
@@ -242,7 +242,7 @@ export default function Home() {
     )
   }
 
-  const formatOptionTemplate = (option) => (
+  const formatOptionTemplate = (option: any) => (
     <div className="flex items-center gap-3 py-0.5">
       <div className="flex justify-center items-center bg-zinc-700/60 rounded-lg w-8 h-8 shrink-0">
         <i className={`pi ${option.icon} text-sm text-zinc-300`} />
@@ -256,7 +256,7 @@ export default function Home() {
     </div>
   )
 
-  const selectedFormatTemplate = (option) => {
+  const selectedFormatTemplate = (option: any) => {
     if (!option)
       return (
         <span className="text-zinc-500 text-sm">
@@ -314,7 +314,7 @@ export default function Home() {
       const a = document.createElement("a")
       a.href = url
       a.download =
-        currentFiles[0].name.replace(/\.[^/.]+$/, "") +
+        currentFiles[0]?.name.replace(/\.[^/.]+$/, "") +
         `.${selectedFormat.code}`
       document.body.appendChild(a)
       a.click()

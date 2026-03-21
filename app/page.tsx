@@ -95,12 +95,12 @@ export default function Home() {
 
   const availableFormats = selectedType ? FORMAT_MAP[selectedType.code] : []
 
-  const handleTypeChange = (e) => {
+  const handleTypeChange = (e: any) => {
     setSelectedType(e.value)
     setSelectedFormat(null)
   }
 
-  const onTemplateSelect = (e) => {
+  const onTemplateSelect = (e: any) => {
     let _totalSize = totalSize
     Object.keys(e.files).forEach((key) => {
       _totalSize += e.files[key].size || 0
@@ -109,15 +109,15 @@ export default function Home() {
     setFileCount(Object.keys(e.files).length)
   }
 
-  const onTemplateUpload = (e) => {
+  const onTemplateUpload = (e: any) => {
     let _totalSize = 0
-    e.files.forEach((file) => {
+    e.files.forEach((file: any) => {
       _totalSize += file.size || 0
     })
     setTotalSize(_totalSize)
   }
 
-  const onTemplateRemove = (file, callback) => {
+  const onTemplateRemove = (file: any, callback: any) => {
     setTotalSize(totalSize - file.size)
     setFileCount((prev) => Math.max(0, prev - 1))
     callback()
@@ -128,7 +128,7 @@ export default function Home() {
     setFileCount(0)
   }
 
-  const getTypeDisabled = (typeCode) => {
+  const getTypeDisabled = (typeCode: any) => {
     if (fileCount === 0) return false
     const currentFiles = fileUploadRef?.current?.getFiles() ?? []
     if (currentFiles.length === 0) return false
@@ -139,7 +139,7 @@ export default function Home() {
     return false
   }
 
-  const headerTemplate = (options) => {
+  const headerTemplate = (options: any) => {
     const { chooseButton, cancelButton } = options
     const value = Math.min((totalSize / 1000000) * 100, 100)
     const formatedValue = fileUploadRef?.current

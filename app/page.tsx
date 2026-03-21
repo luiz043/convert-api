@@ -329,7 +329,7 @@ export default function Home() {
 
   return (
     <main className="relative flex justify-center items-center bg-zinc-900 p-4 min-h-screen overflow-hidden">
-      <div className="relative bg-zinc-900/70 shadow-2xl shadow-black/60 backdrop-blur-xl p-7 border border-white/[0.07] rounded-3xl w-full max-w-[50%]">
+      <div className="relative bg-zinc-900/70 shadow-2xl shadow-black/60 backdrop-blur-xl p-7 border border-white/[0.07] rounded-3xl w-full md:max-w-[50%]">
         <h1 className="bg-clip-text bg-linear-to-r from-violet-400 to-orange-400 mb-2 font-black text-transparent text-3xl leading-tight tracking-tight">
           Conversor de arquivos
         </h1>

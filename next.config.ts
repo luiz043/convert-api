@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://64.181.170.90:8080/api/:path*",
+        destination: "https://api-converter.duckdns.org/:path*",
       },
     ]
   },

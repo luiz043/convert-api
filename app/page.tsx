@@ -295,7 +295,7 @@ export default function Home() {
 
   const canDownload = fileCount > 0 && selectedFormat
 
-  const baseAPIURL = `/api/v1/conversions/${selectedType?.code}s/to-${selectedFormat?.code}`
+  const baseAPIURL = `https://api-converter.duckdns.org/api/v1/conversions/${selectedType?.code}s/to-${selectedFormat?.code}`
 
   const postApiToDownload = async () => {
     const formData = new FormData()

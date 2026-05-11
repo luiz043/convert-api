@@ -45,11 +45,12 @@ const FORMAT_MAP: selectedTypeInterface = {
       icon: "pi-file-pdf",
     },
     {
-      name: "DOCX",
-      description: "Microsoft Word",
-      code: "docx",
-      icon: "pi-file-word",
+      name: "PDF-A",
+      description: "Documento portátil",
+      code: "pdfa",
+      icon: "pi-file-pdf",
     },
+
     {
       name: "TXT",
       description: "Texto simples",
